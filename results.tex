@@ -1,0 +1,282 @@
+
+\section{Results and Discussion}
+% Introduction
+\begin{table*}[h]
+	\centering
+	\caption{Performance of the GNN architectures and loss functions across the Collins, Krogan-Core, and DIP datasets}
+	\vspace{2mm}
+	\label{table:loss_arch_results}
+	\footnotesize
+	\vspace{2mm}
+	\begin{tabular}{c| c c c | c c c c c c}
+		\hline
+		\textbf{Dataset} & \textbf{GNN} & \textbf{Loss} & $\boldsymbol{\lambda}$
+		& \textbf{P} & \textbf{R} & \textbf{F1} & \textbf{Acc} & \textbf{NCP} & \textbf{NCB}
+		\\
+		\hline
+		
+		\multirow{8}{*}{\textbf{Collins}}
+		& \multirow{4}{*}{GCN}
+		& NOCD & N/A
+		& 0.891 & 0.337 & 0.489 & 0.252 & 49 & 187
+		\\
+		
+		& & W-NOCD & N/A
+		& 0.687 & \textbf{0.695} & 0.691 & \textbf{0.326} & 167 & \textbf{385}
+		\\
+		
+		& & HO-NOCD & 0.5
+		& 0.818 & 0.316 & 0.456 & 0.254 & 54 & 175
+		\\
+		
+		& & HO-NOCD & 1
+		& 0.662 & 0.212 & 0.322 & 0.245 & 49 & 118
+		\\
+		\cline{2-10}
+		
+		& \multirow{4}{*}{GAT}
+		& NOCD & N/A
+		& 0.825 & 0.522 & 0.640 & 0.295 & 156 & 289
+		\\
+		
+		& & W-NOCD & N/A
+		& 0.879 & 0.630 & \textbf{0.734} & 0.292 & \textbf{240} & 349
+		\\
+		
+		& & HO-NOCD & 0.5
+		& 0.880 & 0.525 & 0.658 & 0.282 & 161 & 291
+		\\
+		
+		& & HO-NOCD & 1
+		& \textbf{0.916} & 0.381 & 0.538 & 0.276 & 186 & 211
+		\\
+		
+		\hline
+		
+		\multirow{8}{*}{\textbf{Krogan-Core}}
+		& \multirow{4}{*}{GCN}
+		& NOCD & N/A
+		& 0.435 & 0.555 & 0.488 & 0.290 & 141 & 333
+		\\
+		
+		& & W-NOCD & N/A
+		& 0.478 & 0.603 & 0.533 & \textbf{0.294} & 153 & 362
+		\\
+		
+		& & HO-NOCD & 0.5
+		& 0.504 & 0.428 & 0.463 & 0.265 & 123 & 257
+		\\
+		
+		& & HO-NOCD & 1
+		& 0.632 & 0.373 & 0.469 & 0.251 & 117 & 224
+		\\
+		\cline{2-10}
+		
+		& \multirow{4}{*}{GAT}
+		& NOCD & N/A
+		& 0.598 & 0.543 & 0.569 & 0.257 & 238 & 326
+		\\
+		
+		& & W-NOCD & N/A
+		& \textbf{0.655} & \textbf{0.605} & \textbf{0.629} & 0.261 & \textbf{266} & \textbf{363}
+		\\
+		
+		& & HO-NOCD & 0.5
+		& 0.514 & 0.360 & 0.423 & 0.243 & 187 & 216
+		\\
+		
+		& & HO-NOCD & 1
+		& 0.308 & 0.220 & 0.257 & 0.205 & 122 & 132
+		\\
+		
+		\hline
+		
+		\multirow{8}{*}{\textbf{DIP}}
+		& \multirow{4}{*}{GCN}
+		& NOCD & N/A
+		& 0.285 & 0.443 & 0.347 & \textbf{0.278} & 122 & 343
+		\\
+		
+		& & W-NOCD & N/A
+		& \textbf{0.528} & 0.045 & 0.485 & 0.257 & 134 & 348
+		\\
+		
+		& & HO-NOCD & 0.5
+		& 0.304 & 0.163 & 0.212 & 0.246 & 56 & 126
+		\\
+		
+		& & HO-NOCD & 1
+		& 0.233 & 0.134 & 0.170 & 0.227 & 45 & 104
+		\\
+		\cline{2-10}
+		
+		& \multirow{4}{*}{GAT}
+		& NOCD & N/A
+		& 0.314 & 0.413 & 0.357 & 0.242 & 153 & 320
+		\\
+		
+		& & W-NOCD & N/A
+		& 0.523 & \textbf{0.506} & \textbf{0.515} & 0.242 & \textbf{212} & \textbf{392}
+		\\
+		
+		& & HO-NOCD & 0.5
+		& 0.164 & 0.070 & 0.098 & 0.178 & 22 & 54
+		\\
+		
+		& & HO-NOCD & 1
+		& 0.030 & 0.031 & 0.030 & 0.173 & 11 & 24
+		\\
+		
+		\hline
+	\end{tabular}
+\end{table*}
+
+All trainings for DIP and BioGrid are done in 5000 epochs due to their bigger size and 2000 epochs for Collins, Krogan-Core, and Krogan-Extended.
+
+\subsection{Comparing the performance of loss functions and graph neural network architecture}
+
+In this section, we compare the performance of the proposed loss functions, namely W-NOCD and HO-NOCD, with the original NOCD loss using two graph neural network architectures, GCN and GAT. The input features consist of binary GO features derived from the BP and MF subgraphs. A threshold of $0.3$ is used to extract functional modules for evaluating the performance of functional module identification under these settings. The experiments are conducted on three PPI datasets: Collins, Krogan-Core, and DIP.
+
+Table~\ref{table:loss_arch_results} presents the results obtained on the Collins dataset. The results demonstrate the superiority of W-NOCD over both HO-NOCD and the original NOCD loss in terms of the F1 score. Furthermore, when comparing the two GNN architectures, GAT consistently outperforms GCN in terms of F1 score across all loss functions.
+
+%\begin{table*}[ht]
+%	\centering
+%	\caption{Performance of the GNN architectures and loss functions on the Collins dataset}
+%	\footnotesize
+%	\label{table:collins_result}
+%	\vspace{3mm}
+%	\begin{tabular}{c|c|c|c|c|c|c|c|c}
+%		%\hline
+%		\textbf{GNN} & \textbf{Loss Function} & $\boldsymbol{\lambda}$ &
+%		\textbf{Precision} & \textbf{Recall} & \textbf{F1} &
+%		\textbf{Accuracy} & \textbf{NCP} & \textbf{NCB}
+%		\\
+%		\hline
+%		
+%		GCN & NOCD & N/A
+%		& 0.891 & 0.337 & 0.489 & 0.252 & 49 & 187 \\
+%		
+%		GCN & W-NOCD & N/A
+%		& 0.687 & \textbf{0.695} & 0.691 & \textbf{0.326} & 167 & \textbf{385} \\
+%		
+%		GCN & HO-NOCD & 0.5
+%		& 0.818 & 0.316 & 0.456 & 0.254 & 54 & 175 \\
+%		
+%		GCN & HO-NOCD & 1
+%		& 0.662 & 0.212 & 0.322 & 0.245 & 49 & 118 \\
+%		
+%		GAT & NOCD & N/A
+%		& 0.825 & 0.522 & 0.640 & 0.295 & 156 & 289 \\
+%		
+%		GAT & W-NOCD & N/A
+%		& 0.879 & 0.630 & \textbf{0.734} & 0.292 & \textbf{240} & 349 \\
+%		
+%		GAT & HO-NOCD & 0.5
+%		& 0.880 & 0.525 & 0.658 & 0.282 & 161 & 291 \\
+%		
+%		GAT & HO-NOCD & 1
+%		& \textbf{0.916} & 0.381 & 0.538 & 0.276 & 186 & 211 \\
+%		
+%		%\hline
+%	\end{tabular}
+%\end{table*}
+%
+%\begin{table*}[ht]
+%	\centering
+%	\caption{Performance of the GNN architectures and loss functions on the Krogan-Core dataset}
+%	\footnotesize
+%	\label{table:krogan_result}
+%	\vspace{3mm}
+%	\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+%		\hline
+%		\textbf{GNN} & \textbf{Loss Function} & $\boldsymbol{\lambda}$ &
+%		\textbf{Precision} & \textbf{Recall} & \textbf{F1} &
+%		\textbf{Accuracy} & \textbf{NCP} & \textbf{NCB}
+%		\\
+%		\hline
+%		
+%		GCN & NOCD & N/A
+%		& 0.435 & 0.555 & 0.488 & 0.290 & 141 & 333 \\
+%		
+%		GCN & W-NOCD & N/A
+%		& 0.478 & 0.603 & 0.533 & \textbf{0.294} & 153 & 362 \\
+%		
+%		GCN & HO-NOCD & 0.5
+%		& 0.504 & 0.428 & 0.463 & 0.265 & 123 & 257 \\
+%		
+%		GCN & HO-NOCD & 1
+%		& 0.632 & 0.373 & 0.469 & 0.251 & 117 & 224 \\
+%		
+%		GAT & NOCD & N/A
+%		& 0.598 & 0.543 & 0.569 & 0.257 & 238 & 326 \\
+%		
+%		GAT & W-NOCD & N/A
+%		& \textbf{0.655} & \textbf{0.605} & \textbf{0.629} & 0.261 & \textbf{266} & \textbf{363} \\
+%		
+%		GAT & HO-NOCD & 0.5
+%		& 0.514 & 0.360 & 0.423 & 0.243 & 187 & 216 \\
+%		
+%		GAT & HO-NOCD & 1
+%		& 0.308 & 0.220 & 0.257 & 0.205 & 122 & 132 \\
+%		
+%		\hline
+%	\end{tabular}
+%\end{table*}
+%
+%\begin{table*}[ht]
+%	\centering
+%	\caption{Performance of the GNN architectures and loss functions on the DIP dataset}
+%	\footnotesize
+%	\label{table:DIP_result}
+%	\vspace{3mm}
+%	\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+%		\hline
+%		\textbf{GNN} & \textbf{Loss Function} & $\boldsymbol{\lambda}$ &
+%		\textbf{Precision} & \textbf{Recall} & \textbf{F1} &
+%		\textbf{Accuracy} & \textbf{NCP} & \textbf{NCB}
+%		\\
+%		\hline
+%		
+%		GCN & NOCD & N/A
+%		& 0.285 & 0.443 & 0.347 & \textbf{0.278} & 122 & 343 \\
+%		
+%		GCN & W-NOCD & N/A
+%		& \textbf{0.528} & 0.045 & 0.485 & 0.257 & 134 & 348 \\
+%		
+%		GCN & HO-NOCD & 0.5
+%		& 0.304 & 0.163 & 0.212 & 0.246 & 56 & 126 \\
+%		
+%		GCN & HO-NOCD & 1
+%		& 0.233 & 0.134 & 0.170 & 0.227 & 45 & 104 \\
+%		
+%		GAT & NOCD & N/A
+%		& 0.314 & 0.413 & 0.357 & 0.242 & 153 & 320 \\
+%		
+%		GAT & W-NOCD & N/A
+%		& 0.523 & \textbf{0.506} & \textbf{0.515} & 0.242 & \textbf{212} & \textbf{392} \\
+%		
+%		GAT & HO-NOCD & 0.5
+%		& 0.164 & 0.070 & 0.098 & 0.178 & 22 & 54 \\
+%		
+%		GAT & HO-NOCD & 1
+%		& 0.030 & 0.031 & 0.030 & 0.173 & 11 & 24 \\
+%		
+%		\hline
+%	\end{tabular}
+%\end{table*}
+
+\subsection{Comparing the Activation Functions}
+
+In this section, we investigate the effect of different activation functions on functional module identification using the GAT architecture with both binary and embedding-based features. We first evaluate the activation functions using binary GO features and then using GO embedding features.
+
+For the binary features, the results show that ELU achieves the highest Precision across all datasets. However, ReLU generally provides the highest F1 score and Accuracy. The only exception is the Krogan-Core dataset, for which GELU achieves better performance than ReLU in terms of these metrics.
+
+For the embedding features, the results are somewhat different for the Collins dataset. In this case, ELU achieves a higher F1 score, with improvements of 6\% and 9\% compared with GELU and ReLU, respectively. Furthermore, for Collins, ReLU achieves the highest Precision, whereas GELU provides the highest Accuracy. For the other datasets, ReLU generally outperforms the other two activation functions.
+
+Overall, the results indicate that ReLU provides the most consistent performance across datasets and feature types, particularly in terms of F1 score and Accuracy. Therefore, ReLU is selected as the activation function for the subsequent experiments.
+
+\subsection{Analyzing the JKNet Mechanism}
+
+In this section, we investigate the effect of incorporating the JKNet mechanism into the proposed architecture. Three JKNet aggregation strategies are evaluated: MaxPooling, Concatenation, and LSTM Attention. The results show that the standard GAT architecture consistently outperforms the GAT models incorporating these JKNet mechanisms.
+
+For the Collins dataset, although the differences in performance are relatively small, GAT achieves a higher F1 score than all three JKNet variants. This advantage is more pronounced on the Krogan-Core dataset, where GAT achieves a considerably higher F1 score than the models incorporating JKNet mechanisms. Overall, despite the motivation behind JKNet to combine representations from different layers of the graph neural network, the experimental results do not indicate a performance improvement from incorporating these mechanisms into the proposed architecture for functional module identification in PPI networks.

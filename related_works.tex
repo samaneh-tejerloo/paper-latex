@@ -1,0 +1,89 @@
+\section{Related Work}
+In this section, we review previous studies on the identification of protein complexes in PPI networks. As discussed earlier, this research focuses on the use of graph neural networks for functional module identification in PPI networks, as well as on the integration of biological information to improve module detection accuracy. Since identifying protein complexes in PPI networks can be naturally formulated as a graph clustering problem, we first review several studies on attributed graph clustering that are closely related to our objective.
+
+\subsection{Attributed Graph Clustering}
+Jannesari et al. \cite{nonnegative} introduced an algorithm based on Non-negative Matrix Factorization (NMF) for clustering attributed graphs. Their method maps the structural information, represented by the adjacency matrix, into a low-dimensional space using Symmetric NMF, and the node feature information using Projective NMF. This joint space corresponds to the number of clusters and indicates the membership degree of each node. To maintain clustering consistency across both spaces, the two matrices are aligned using their proposed objective function. This method can be viewed as a hybrid of subspace clustering and NMF.
+
+Kang et al. \cite{fine} proposed a method based on Graph Convolutional Networks (GCNs) and spectral clustering. The core idea relies on graph signal processing, applying a low-pass, $\bar{X} = (I - 1/2 L)^k X$, filter to merge node features with the graph structure, yielding a new representation.   
+Here, $k$ is a hyperparameter determining the proximity order. In other words, smaller $k$ yields a more local view, and vice versa. The $L = I - A$ is the normalized Laplacian matrix. To apply spectral clustering, the node similarity matrix $S$ is computed by optimizing the objective function defined in Equation \ref{eq:loss-kang}.
+\begin{equation}
+	\min_S ||\bar{X}^T - \bar{X}^T S||_F^2 + \alpha||S - f(A)||_F^2
+	\label{eq:loss-kang}    
+\end{equation}
+The optimized matrix $S$ is then converted into a symmetric non-negative matrix, upon which spectral clustering is applied. Since selecting the optimal $k$ is challenging, Zhang et al. \cite{adaptive} proposed two strategies, AGC and IAGC, to adaptively find an appropriate value for $k$.
+
+Bhowmick et al. \cite{bhowmick2024dgcluster} introduced DGCluster, a modularity maximization-based approach utilizing GNNs for attributed graph clustering. A two-layer GCN with a SELU activation function generates node representations, which are constrained to a positive coordinate space to facilitate similarity computations. Using cosine similarity, an extended modularity function is defined, and the loss is set as its negative. The final clustering is performed on these representations using the BIRCH hierarchical clustering algorithm \cite{zhang1996birch}, which does not require a predefined number of clusters.
+
+He et al. \cite{he2024detecting} presented a unified framework called SSAGCN (Self-Supervised Adaptive Graph Convolutional Network). Given an input attributed graph $G(V,E,A,X)$, an auxiliary graph $G(V,E_a,A_a,X)$ is constructed using k-nearest neighbors based on feature cosine similarity. Both graphs are fed into weight-sharing GCNs, and the resulting representations are combined via an attention mechanism. The loss function uses a dual decoder mechanism combining modularity maximization, adjacency reconstruction, and feature reconstruction. Nodes are assigned to clusters based on maximum membership scores.
+
+A prominent work in attributed graph clustering, which serves as a core foundation for this research, is the NOCD algorithm proposed by Shchur and Günnemann \cite{nocd2019}. It integrates GNNs with a Probabilistic Bernoulli-Poisson Generative Model. Given $G(A, X)$, a GNN parameterized by $\theta$ extracts the cluster membership matrix $F = GNN_{\theta}(A, X)$. Where $F \in \mathbb{R}^{n \times C}\ge 0$ indicates the assignment intensity of nodes to clusters. The GNN is a two-layer GCN with ReLU activation as Equation \ref{eq:gnn-nocd}:
+\begin{equation}
+	\begin{aligned}
+		& \tilde{A} = A + I_N \\
+		& \tilde{D}_{ii} = \sum_{j} \tilde{A}_{ij} \\
+		& \hat{A} = \tilde{D}^{-1/2}\tilde{A}\tilde{D}^{-1/2} \\
+		& F = ReLU(\hat{A}ReLU(\hat{A}XW^{(1)})W^{(2)})
+	\end{aligned}
+	\label{eq:gnn-nocd}
+\end{equation}
+A Bernoulli-Poisson generative model acts as a decoder to reconstruct $A$. The existence of an edge between nodes $u$ and $v$ is modeled as $A_{uv} \sim Bernoulli(1-e^{-F_uF_v^T})$. The likelihood of observing $A$ given $F$ can be formulated as Equation \ref{eq:loss-nocd-unnormalized}:
+\begin{equation}
+	P(A|F) = \prod_{A_{uv}\in E} (1-e^{-F_uF_v^T}) \times \prod_{A_{uv}\notin E} e^{-F_uF_v^T}
+	\label{eq:loss-nocd-unnormalized}
+\end{equation}
+Then, the negative log-likelihood loss would be defined as Equation \ref{eq:loss-nocd}.
+\begin{equation}
+	L_{A}(F) = -\sum_{A_{uv}\in E} \log(1-\exp(-F_uF_v^T)) + \sum_{A_{uv}\notin E} F_uF_v^T
+	\label{eq:loss-nocd}
+\end{equation}
+Because real-world graphs are typically sparse, non-edges heavily dominate the loss. To resolve this, the authors proposed a normalized version using expected values over uniform distributions of edges ($P_E$) and non-edges ($P_N$) that results in Equation \ref{eq:loss-nocd-normalized}.
+\begin{equation}
+	L_{A}(F) = -E_{(U,V)\sim P_E}[\log(1-\exp(-F_uF_v^T))] + E_{(u,v)\sim P_N}[F_uF_v^T]
+	\label{eq:loss-nocd-normalized}
+\end{equation}
+Final clusters are obtained by thresholding $F$ with a hyperparameter $\varphi=0.5$.
+
+\subsection{Protein Complex Prediction}
+Methods for predicting protein complexes in PPI networks can be broadly categorized into network-based approaches and biological context-aware approaches.
+
+\subsubsection{Network-based Methods}
+These methods rely solely on the structural topology of the PPI network and, as noted earlier, are typically classified into two main approaches: divisive and agglomerative.
+\begin{itemize}
+	\item \textbf{Divisive methods}: These iteratively partition the network into sub-networks. A widely used algorithm is the Markov Clustering Algorithm (MCL) \cite{2012markov}, which uses random walks to identify dense subgraphs.
+	\item \textbf{Agglomerative methods}: Starting with seed proteins, these methods expand to form complexes. CPNM \cite{2020motif} uses network motifs to represent protein roles. ClusterONE \cite{2012clusterone} grows highly cohesive groups from high-degree seed proteins. MCODE \cite{2003mcode} uses a three-stage process of vertex weighting, complex prediction, and post-processing based on connectivity criteria.
+\end{itemize}
+
+\subsubsection{Biological Context-aware Methods}
+Incorporating supplementary biological data significantly improves prediction accuracy. For instance, PCIA \cite{2013PCIA} integrates GO annotations with network topology, while Zhang et al. \cite{2019integrating} demonstrated the correlation between complex formation and co-expression.
+\begin{itemize}
+	\item \textbf{Core-attachment methods}: These assume complexes consist of a highly co-expressed core and attached peripheral proteins. COACH \cite{2009core} identifies core proteins and subsequently attaches others to form biologically meaningful modules. CORE \cite{2009predicting} works similarly while scoring the significance of identified modules. Recently, CO-DPC utilized gene expression profiles alongside PPI networks under this paradigm.
+	\item \textbf{Functional information-based algorithms}: These leverage heterogeneous functional data. PCP \cite{2008PCP} weights the PPI network using structural information, finds maximal cliques, and merges them based on inter-cluster density. Berahmand et al. \cite{berahmand2021spectral} proposed TADW-SC, which uses the TADW algorithm \cite{yang2015network} to extract joint embeddings from both the PPI structure and GO annotations, subsequently applying spectral clustering. 
+\end{itemize}
+Other strategies successful in general graph processing, such as representation learning \cite{2019hierarchical, 2018embeding} and matrix factorization \cite{2020integrative}, have also been adapted for this domain.
+
+\subsection{GNN-based Methods}
+The application of GNNs for protein complex identification remains relatively under-explored, which is a primary motivation for the current study. However, existing works show promising results \cite{zaki2021identifying}. Notably, Chen et al. \cite{chen2023adappi} proposed AdaPPI, which demonstrated superior performance compared to many traditional baselines.
+
+AdaPPI combines a GCN with an adaptive node-level representation learning strategy. It extracts binary feature vectors from GO annotations (BP and MF). The output of each GCN layer is fed into an RNN, trained simultaneously, to predict the optimal smoothing degree for each node. This prevents over-smoothing and under-smoothing by acknowledging that high-degree nodes require lower-order neighborhood information, while low-degree nodes benefit from higher-order context.
+
+Let \(X \in \mathbb{R}^{n \times m}\) denote the binary GO feature matrix, where \(n\) is the number of proteins and \(m\) is the number of GO terms. Let \(A \in \{0,1\}^{n \times n}\) be the adjacency matrix of the PPI network and \(D \in \mathbb{R}^{n \times n}\) be the diagonal degree matrix. The graph Laplacian is then defined as \(L = D - A\). By eigenvalue decomposition, \(L\) can be written as \(L = U \Lambda U^{-1}\), where \(U\) contains the eigenvectors and \(\Lambda\) is the diagonal matrix of eigenvalues. Based on this decomposition, the \(k\)-th graph convolution for node \(i\) is computed using Equation \ref{eq:node-rep-adappi}, where $p(\lambda_i) =1-\frac{1}{2}\lambda_i$ denotes the spectral filter.
+\begin{equation}
+	h_i^k = G^k X_i = U, p(\Lambda)^k, U^{-1} X_i
+	\label{eq:node-rep-adappi}
+\end{equation}
+ An RNN is then used to estimate the smoothness weight of each node at step \(k\) as \(q_i^k = \sigma\!\left(w_q \cdot f_0(h_i^k) + b_q\right)\). Given a threshold \(\epsilon\), the convolution process continues until \(\sum_{k=1}^{K} q_i^k \leq \epsilon\). Finally, the representation of node \(i\) is obtained by Equation \ref{eq:node-rep-adaptive-adappi}. 
+ \begin{equation}
+ 	\bar{x}_i = \sum_{k=1}^{K} q_i^k h_i^k
+ 	\label{eq:node-rep-adaptive-adappi}
+ \end{equation}
+After learning the embeddings, AdaPPI relies on a classic clique-expansion algorithm to identify final functional modules. The loss function ensures nodes in the same cluster have similar embeddings while pushing apart nodes in different clusters using equation \ref{eq:adappi-loss}.
+\begin{equation}
+	\begin{aligned}
+		& L_{\text{intra}} = \frac{1}{|C|} \sum_{c \in C} \frac{1}{|c|(|c|-1)} \sum_{i,j \in c,\, i \neq j} \lVert \bar{X}_i - \bar{X}_j \rVert_2 \\
+		& L_{\text{inter}} = \frac{1}{|C|} \sum_{c \in C} \frac{1}{|c|(n-|c|)} \sum_{i \in c,\, j \notin c} \lVert \bar{X}_i - \bar{X}_j \rVert_2 \\
+		& L = L_{\text{intra}} + \beta \frac{1}{L_{\text{inter}}}
+	\end{aligned}
+	\label{eq:adappi-loss}
+\end{equation}
+
+Although AdaPPI achieves state-of-the-art results on several PPI networks, it uses a two-stage disjoint pipeline including representation learning followed by classical clustering rather than an end-to-end unified clustering framework.

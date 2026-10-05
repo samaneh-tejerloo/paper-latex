@@ -1,0 +1,48 @@
+\documentclass[twocolumn]{article}
+
+% --- Packages ---
+\usepackage{lipsum} % For generating placeholder text
+\usepackage{hyperref} % For clickable links
+\usepackage{anyfontsize}
+\usepackage{t1enc}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.75in]{geometry} % Adjust margins for better readability
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+
+\renewcommand{\arraystretch}{1.2}
+% --- Title Information ---
+\title{Your Article Title Here}
+\author{Your Name \\ \texttt{email@example.com}}
+\date{\today}
+
+% --- Document Content ---
+\begin{document}
+	\fontsize{8pt}{11pt}\selectfont
+	\maketitle
+	
+	\input{abstract.tex}
+	
+	\input{introduction.tex}
+	
+	\input{related_works.tex}
+	
+	\input{methodology.tex}
+	
+	\input{model_evaluation.tex}
+	
+	\input{results.tex}
+	
+	%\input{case_studies.tex}
+	
+	
+	\input{conclusion.tex}
+	
+	\bibliographystyle{plain}
+	\bibliography{references}
+	
+\end{document}

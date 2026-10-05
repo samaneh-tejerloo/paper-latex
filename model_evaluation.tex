@@ -1,0 +1,149 @@
+\section{Model Evaluation}
+\subsection{Baselines}
+To evaluate the proposed model, XXXX, and investigate the effectiveness of integrating complementary biological information into protein functional module identification, we compare it with representative methods spanning several methodological categories. First, we consider methods that rely primarily on the structural information of the PPI network, allowing us to assess the contribution of biological information beyond network topology. Second, we compare XXXX with methods that integrate complementary biological information, such as gene expression profiles and GO annotations, to improve the identification of functional modules. Finally, we evaluate XXXX against recent adaptive and learning-based approaches, including AGC and AdaPPI, which employ adaptive mechanisms to learn protein representations.
+
+\begin{enumerate}
+	\item \textbf{Graph structure-based methods}:
+	This category comprises methods that identify protein functional modules primarily from the topology of the PPI network, without incorporating additional biological information. These approaches exploit different structural properties of the network, including connectivity, local neighborhood relationships, density, and community structure. The methods considered in this category include Markov Clustering (MCL), Molecular Complex Detection (MCODE), Clustering with Maximal Cliques (CMC), and ClusterONE. In addition, we consider Protein Complexes from Coherent Partition (PC2P), which follows a different structural paradigm by formulating module identification as a graph partitioning problem and seeking a partition obtained through the removal of a minimum number of edges.
+	
+	\item \textbf{Graph structure and biological information-based methods}:
+	Methods in this category incorporate the PPI network structure together with complementary biological information, while employing different representation learning and module detection strategies. COACH employs a core-attachment strategy for functional module identification while incorporating gene expression profiles to improve the identification of functionally related proteins. GANE learns joint protein representations by integrating PPI network structure with GO information, after which a core-attachment strategy is applied to identify protein complexes. Similarly, TADW-SC integrates PPI structure and GO information to learn protein representations, but employs spectral clustering to identify protein modules. DPCMNE adopts a multi-level network embedding strategy to learn protein representations and subsequently applies a modified core-attachment approach for functional module detection.
+	
+	More recent approaches employ graph neural network-based representation learning. AGC uses a graph convolutional approach based on a low-pass graph filter to learn protein representations, while R-GMM-VGAE employs a variational graph autoencoder combined with a Gaussian mixture model for graph-based clustering. AdaPPI further builds upon adaptive graph representation learning by introducing a node-specific mechanism for determining the degree of neighborhood aggregation. Specifically, it employs a recurrent neural network to estimate the saturation level of each node and uses this information to determine the appropriate number of graph convolution steps for its representation. The resulting representations are subsequently used within a core-attachment module identification framework. These methods allow us to evaluate XXXX against approaches that progressively incorporate more expressive and adaptive mechanisms for learning protein representations from PPI networks and complementary biological information.
+	
+\end{enumerate}
+
+\subsection{Evaluation Metrics}
+
+To ensure a fair comparison between the proposed method and existing approaches, particularly AdaPPI \cite{}, we follow the evaluation protocol adopted in previous studies and use the same evaluation metrics and gold-standard complexes. The performance of the methods is evaluated using precision, recall, F-score, and accuracy.
+
+Let $P$ denote the set of predicted protein functional modules and $B$ denote the corresponding set of reference modules in the gold standard. The correspondence between a predicted module $p \in P$ and a reference module $b \in B$ is quantified using the Neighborhood Affinity ($NA$) score, defined as equation \ref{eq:NA}.
+
+\begin{equation}
+	NA(p,b) =
+	\frac{|v_p \cap v_b|^2}
+	{|v_p| \times |v_b|}
+	\label{eq:NA}
+\end{equation}
+
+where $v_p$ and $v_b$ denote the sets of proteins contained in the predicted module $p$ and the reference module $b$, respectively, and $|\cdot|$ denotes the cardinality of a set. The $NA$ score measures the degree of overlap between two protein modules while accounting for their respective sizes. A predicted module $p$ and a reference module $b$ are considered a match if their $NA$ score is greater than or equal to a predefined threshold $\varphi$. Following previous studies on protein functional module identification \cite{nonnegative}, we set $\varphi = 0.25$.
+
+Because a predicted module may match multiple reference modules, and a reference module may also be matched by multiple predicted modules, we separately define the number of matched predicted modules and matched reference modules. Specifically, $N_{cp}$ denotes the number of predicted modules that have at least one matching reference module, whereas $N_{cb}$ denotes the number of reference modules that have at least one matching predicted module. These quantities are defined as equation \ref{eq:ncb-and-ncp}.
+
+\begin{equation}
+	\begin{gathered}
+		N_{cp} = |\{p | p \in P, \exists b \in B, NA(p,b) \ge \varphi\}| \\
+		N_{cb} = |\{b | b \in B, \exists p \in P, NA(p,b) \ge \varphi\}|
+	\end{gathered}
+	\label{eq:ncb-and-ncp}
+\end{equation}
+
+Using the numbers of matched predicted and reference modules, $N_{cp}$ and $N_{cb}$, respectively, precision and recall are defined as equation \ref{eq:precision-recall}.
+
+\begin{equation}
+	\begin{aligned}
+		\mathrm{Precision} &= \frac{|N_{cp}|}{|P|} \ \;
+		\mathrm{Recall} &= \frac{|N_{cb}|}{|B|}
+	\end{aligned}
+	\label{eq:precision-recall}
+\end{equation}
+
+Precision measures the proportion of predicted modules that have at least one corresponding reference module, whereas recall measures the proportion of reference modules that are identified by at least one predicted module. The F-score combines precision and recall into a single measure and is defined as their harmonic mean using equation \ref{eq:f-score}.
+
+\begin{equation}
+	F\text{-score} =
+	\frac{2 \times \mathrm{Precision} \times \mathrm{Recall}}
+	{\mathrm{Precision} + \mathrm{Recall}}
+	\label{eq:f-score}
+\end{equation}
+
+
+Another metric commonly used to evaluate protein functional module identification methods is accuracy. Unlike precision, recall, and F-score, which are calculated based on whether pairs of predicted and reference modules satisfy a predefined $NA$ threshold, accuracy evaluates the correspondence between predicted and reference modules based directly on their shared proteins. Specifically, let $T_{ij}$ denote the number of proteins shared between reference module $i$ and predicted module $j$, and let $N_i$ denote the number of proteins in reference module $i$.
+
+Accuracy is calculated as the geometric mean of clustering-wise sensitivity ($Sn$) and clustering-wise positive predictive value ($PPV$), as defined in Equation~\ref{eq:acc}.
+
+\begin{equation}
+	Acc = \sqrt{Sn \times PPV},
+	\label{eq:acc}
+\end{equation}
+
+where $Sn$ measures the extent to which the proteins in the reference modules are recovered by the predicted modules, while $PPV$ measures the proportion of proteins assigned to predicted modules that correspond to proteins in the best-matching reference modules. They are defined as equations \ref{eq:sn} and \ref{eq:ppv} respectively.
+
+\begin{equation}
+	Sn =
+	\frac{
+		\sum_{i=1}^{|B|}
+		\max_{j=1,\ldots,|P|} T_{ij}
+	}{
+		\sum_{i=1}^{|B|} N_i
+	}
+	\label{eq:sn}
+\end{equation}
+
+\begin{equation}
+	PPV =
+	\frac{
+		\sum_{j=1}^{|P|}
+		\max_{i=1,\ldots,|B|} T_{ij}
+	}{
+		\sum_{j=1}^{|P|}
+		\sum_{i=1}^{|B|} T_{ij}
+	}
+	\label{eq:ppv}
+\end{equation}
+
+Here, $T_{ij}$ represents the number of shared proteins between reference module $i$ and predicted module $j$. Thus, $Sn$ evaluates the coverage of reference modules, whereas $PPV$ evaluates the correspondence between predicted modules and their best-matching reference modules. The resulting accuracy provides a measure that jointly considers both aspects of module correspondence without requiring an $NA$ threshold.
+
+%Modularity is metric to assess the quality of partitioning. Considering $m$ as number of edges, $k_i$ denoting the degree of node $i$, and $A$ as adjacency matrix modularity is defined as equation \ref{eq:modularity-partitioning}.
+%\begin{equation}
+%	\label{eq:modularity-partitioning}
+%	Q = \frac{1}{2m}\sum_{ij} (A_{ij} - \frac{k_ik_j}{2m})\delta(c_i, c_j)
+%\end{equation}
+%Where $\delta$ is the Kronecker delta and $c_i$ is the community to which node $i$ is assigned. The $\delta(c_i,c_j) = 1$ if $c_i = c_j$ and 0 otherwise. Since in this study we want to asses the quality of overlapping comunities, another version of modularity which is  defined for assessing the quality of overlapping comunities in weighted graph is used. Considering the $k_i$ as the sum of weights of node $i$ edges, $c_i$ be the set of comunities node $i$ belongs to, and $A$ is the weighted adjacency matrix. Then, the overlapping version of modularity in weighted graphs is defined as equation \ref{}.
+%
+%\begin{equation}
+%	Q = \frac{1}{2m}\sum_{ij}\frac{A_{ij} - \frac{k_ik_j}{2m}{|c_i||c_j| + \epsilon}}\delta^{\prime}(c_i, c_j)
+%\end{equation}
+%where $|.|$ denotes the size of the set, and $\delta^{\prime}(c_i, c_j)=1$ if $|c_i \cap c_j| \geq 1$ and 0 otherwise. $\epsilon$ is a small positive number to avoid division by zero.
+
+Modularity is a widely used metric for evaluating the quality of a network partition. Let $m$ denote the total number of edges, $k_i$ denote the degree of node $i$, and $A$ denote the adjacency matrix of the network. The modularity of a non-overlapping community partition is defined as
+\begin{equation}
+	\label{eq:modularity-partitioning}
+	Q = \frac{1}{2m}\sum_{ij}
+	\left(
+	A_{ij} - \frac{k_i k_j}{2m}
+	\right)
+	\delta(c_i,c_j)
+\end{equation}
+where $c_i$ denotes the community to which node $i$ is assigned, and $\delta(c_i,c_j)$ is the Kronecker delta, which is equal to $1$ when $c_i=c_j$ and $0$ otherwise. Thus, only pairs of nodes assigned to the same community contribute to the modularity.
+
+Since the functional modules considered in this study may overlap, the standard modularity measure is not directly applicable. Therefore, an overlapping version of modularity designed for weighted networks is employed to evaluate the quality of the identified overlapping modules. Let $A$ denote the weighted adjacency matrix, $k_i=\sum_j A_{ij}$ denote the weighted degree (i.e., the strength) of node $i$, and $c_i$ denote the set of communities to which node $i$ belongs. The overlapping modularity is defined as
+\begin{equation}
+	\label{eq:modularity-overlapping}
+	Q_{\mathrm{ov}}
+	=
+	\frac{1}{2m}
+	\sum_{ij}
+	\left(
+	A_{ij}
+	-
+	\frac{k_i k_j}{2m\,|c_i|\,|c_j|+\epsilon}
+	\right)
+	\delta'(c_i,c_j)
+\end{equation}
+where $|c_i|$ denotes the number of communities containing node $i$, and
+$\delta'(c_i,c_j)$ indicates whether nodes $i$ and $j$ share at least one community. Specifically,
+\begin{equation}
+	\delta'(c_i,c_j)
+	=
+	\begin{cases}
+		1, & |c_i \cap c_j| \geq 1\\
+		0, & |c_i \cap c_j| = 0
+	\end{cases}
+\end{equation}
+Here, $\epsilon$ is a small positive constant introduced to avoid division by zero. In this formulation, the contribution of each node pair is adjusted according to the number of communities to which the corresponding nodes belong, allowing the modularity measure to account for overlapping community assignments.
+
+\subsection{Parameter Settings}
+
+In this section, we describe the parameter settings used for the proposed method. All GNN architectures evaluated in this study consist of two layers. For GAT and its variants, four attention heads are used in each layer. The learning rate is set to $1\times10^{-4}$, and the Adam optimizer is employed for model training. The Go2Vec features have a dimensionality of 384, while the dimensionality of the binary GO features varies across datasets and is reported in Table~\ref{table:dataset-stats}. The dimensionality of the dependency matrix $F$, denoted by $C$, is set to 512. The dimensionality of the intermediate node representations in the GNN layers is also set to 512.
+
